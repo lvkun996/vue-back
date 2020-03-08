@@ -1,6 +1,5 @@
 <template>
     <div class="login_container">
-        我是登录页
         <div class="login_box">
             <!-- 头像区域 -->
             <div class="attr_img">
@@ -8,17 +7,17 @@
             </div>
             <!-- /头像区域 -->
             <!-- 表单区域 -->
-            <el-form class="myForm">
-                <el-form-item>
-                    <el-input v-model="user.name" prefix-icon="el-icon-user-solid">11</el-input>
+            <el-form class="myForm" :model="user" ref="myForm" :rules="rules">
+                <el-form-item prop="username">
+                    <el-input v-model="user.username" prefix-icon="el-icon-user-solid">11</el-input>
                 </el-form-item>
-                <el-form-item>
+                <el-form-item prop="password">
                     <el-input v-model="user.password" show-password prefix-icon="el-icon-lock">11</el-input>
                 </el-form-item>
                 <!-- 登录区域 -->
                 <el-form-item style="display:flex;justify-content:flex-end">
-                    <el-button type="primary">登录</el-button>
-                    <el-button type="info">重置</el-button>
+                    <el-button type="primary" @click="userRegister">登录</el-button>
+                    <el-button type="info" @click="resetForm">重置</el-button>
                 </el-form-item>
                 <!-- /登录区域 -->
             </el-form>
@@ -29,14 +28,49 @@
 </template>
 
 <script>
+
+import { getUserInfo } from '@/API/login'
+
+import { setItem } from '@/utils/storeage.js'
+
 export default {
   name: 'loginPage',
   data () {
     return {
       user: {
-        name: '',
+        username: '',
         password: ''
+      },
+      rules: {
+        username: [{ required: true, message: '用户名不能为空', trigger: 'blur' },
+          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ],
+        password: [{ required: true, message: '密码不能为空', trigger: 'blur' },
+          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+        ]
       }
+    }
+  },
+  methods: {
+    async userRegister () {
+      const loginMessage = await this.$refs.myForm.validate()
+      if (loginMessage) {
+        try {
+          const { data } = await getUserInfo(this.user)
+          console.log(data)
+          if (data.meta.status === 400) {
+            console.log(1)
+            this.$message(`${data.meta.msg}`)
+          }
+          setItem('token', data.token)
+        } catch (error) {
+          console.log('操作失败')
+        }
+      }
+    },
+    // 重置表单
+    resetForm () {
+      this.$refs.myForm.resetFields()
     }
   }
 }
