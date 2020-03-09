@@ -38,8 +38,8 @@ export default {
   data () {
     return {
       user: {
-        username: '',
-        password: ''
+        username: 'admin',
+        password: '123456'
       },
       rules: {
         username: [{ required: true, message: '用户名不能为空', trigger: 'blur' },
@@ -59,12 +59,18 @@ export default {
           const { data } = await getUserInfo(this.user)
           console.log(data)
           if (data.meta.status === 400) {
-            console.log(1)
-            this.$message(`${data.meta.msg}`)
+            this.$message.error(`${data.meta.msg}`)
+            return
           }
-          setItem('token', data.token)
+          this.$message.success('登录成功')
+          console.log(data.data.token)
+
+          setItem('token', data.data.token)
+          console.log(1)
+
+          this.$router.push('/home')
         } catch (error) {
-          console.log('操作失败')
+          this.$message.error('操作失败')
         }
       }
     },
