@@ -1,5 +1,5 @@
 <template>
-    <el-submenu>
+    <el-submenu index="1">
       <template slot="title">
         <slot name="itemIcon"></slot>
         <slot name="stairName"></slot>

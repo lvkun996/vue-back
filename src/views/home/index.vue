@@ -1,6 +1,5 @@
 <template>
     <div class="home_containe1">
-
             <el-container class="home_containe">
               <el-header>
                   <div class="hader">
@@ -22,113 +21,43 @@
               <!-- 主体区 -->
               <el-container>
                 <!-- 左侧侧边栏 -->
-                <el-aside width="200px">
+                <el-aside :width="collapse?'64px':'200px'" >
+                    <div class="flex_box" @click="collapse = !collapse">|||</div>
                        <el-menu
-                          default-active="2"
                           class="el-menu-vertical-demo"
-                          @open="handleOpen"
-                          @close="handleClose"
                           background-color="#333744"
                           text-color="#fff"
-                          active-text-color="#ffd04b">
-                          <!-- 第一项 -->
-                            <submenu index="1">
-                                <template slot="itemIcon">
-                                  <i class="el-icon-user-solid"></i>
-                                </template>
-                                <template slot="stairName">
-                                  用户管理
-                                </template>
-                                <template slot="secondName">
-                                  <template >
-                                      <i class="el-icon-user-solid"></i>
-                                  </template>
-                                    <template >
-                                      用户列表
-                                    </template>
-                                </template>
-                            </submenu>
-                           <!-- 第二项 -->
-                            <el-submenu index="2">
+                          active-text-color="rgb(64, 158, 255)"
+                          :default-active="indexStatus"
+                          unique-opened
+                          :collapse="collapse"
+                          :collapse-transition='false'
+                          router
+                          >
+                            <el-submenu :index="item.id + ''" v-for="item in menuLits" :key="item.id">
                                     <template slot="title">
-                                      <i class="el-icon-lock"></i>
-                                      <span>权限管理</span>
+                                      <i :class="icons[item.id]"></i>
+                                      <span>{{item.authName}}</span>
                                     </template>
                                     <el-menu-item-group>
-                                      <el-menu-item index="1-1">
+                                      <el-menu-item :index="'/'+children.path" v-for="children in item.children" :key="children.id"
+                                        @click="indexStatus = '/'+children.path"
+                                      >
                                           <template slot="title">
-                                             <i class="el-icon-unlock"></i>
-                                              <span>角色列表</span>
-                                          </template>
-                                    </el-menu-item>
-                                      <el-menu-item index="1-2">
-                                         <template slot="title">
-                                             <i class="el-icon-unlock"></i>
-                                              <span>权限列表</span>
+                                             <i class="el-icon-menu"></i>
+                                              <span>{{children.authName}}</span>
                                           </template>
                                       </el-menu-item>
                                     </el-menu-item-group>
-                            </el-submenu>
-                            <el-submenu index="3">
-                                    <template slot="title">
-                                      <i class="el-icon-s-goods"></i>
-                                      <span>商品管理</span>
-                                    </template>
-                                    <el-menu-item-group>
-                                      <el-menu-item index="1-1">
-                                          <template slot="title">
-                                             <i class="el-icon-shopping-cart-full"></i>
-                                              <span>商品列表</span>
-                                          </template>
-                                    </el-menu-item>
-                                      <el-menu-item index="1-2">
-                                         <template slot="title">
-                                             <i class="el-icon-shopping-cart-full"></i>
-                                              <span>分类参数</span>
-                                          </template>
-                                      </el-menu-item>
-                                      <el-menu-item index="1-3">
-                                         <template slot="title">
-                                             <i class="el-icon-shopping-cart-full"></i>
-                                              <span>商品分类</span>
-                                          </template>
-                                      </el-menu-item>
-                                    </el-menu-item-group>
-                            </el-submenu>
-                            <el-submenu index="4">
-                                    <template slot="title">
-                                      <i class="el-icon-tickets"></i>
-                                      <span>订单管理</span>
-                                    </template>
-                                    <el-menu-item-group>
-                                      <el-menu-item index="1-1">
-                                          <template slot="title">
-                                             <i class="el-icon-document-checked"></i>
-                                              <span>订单列表</span>
-                                          </template>
-                                    </el-menu-item>
-                                     </el-menu-item-group>
-                            </el-submenu>
-                            <el-submenu index="5">
-                                    <template slot="title">
-                                      <i class="el-icon-data-board"></i>
-                                      <span>数据统计</span>
-                                    </template>
-                                    <el-menu-item-group>
-                                      <el-menu-item index="1-1">
-                                          <template slot="title">
-                                             <i class="el-icon-pie-chart"></i>
-                                              <span>数据报表</span>
-                                          </template>
-                                    </el-menu-item>
-                                     </el-menu-item-group>
                             </el-submenu>
                         </el-menu>
 
                 </el-aside>
                  <!-- 左侧侧边栏 -->
                  <!-- 右侧主题区 -->
-                <el-main>Main</el-main>
+                <el-main>
+                  <router-view></router-view>
+                </el-main>
                 <!-- 右侧主题区 -->
               </el-container>
               <!-- 主体区 -->
@@ -139,12 +68,23 @@
 
 <script>
 import { removeItem } from '@/utils/storeage.js'
+
+import { getMenu } from '@/API/jurisdiction'
 export default {
 
   name: 'homePage',
   data () {
     return {
-
+      menuLits: [],
+      icons: {
+        125: 'el-icon-user-solid',
+        103: 'el-icon-lock',
+        101: 'el-icon-s-goods',
+        102: 'el-icon-tickets',
+        145: 'el-icon-data-board'
+      },
+      collapse: false,
+      indexStatus: ''
     }
   },
   methods: {
@@ -152,7 +92,16 @@ export default {
     loginOut () {
       removeItem('name')
       this.$router.push('/login')
+    },
+    // 获取所有的菜单
+    async getMenuAll () {
+      const { data } = await getMenu()
+      console.log(data)
+      this.menuLits = data.data
     }
+  },
+  created () {
+    this.getMenuAll()
   }
 }
 </script>
@@ -206,6 +155,21 @@ export default {
 
   }
   .el-menu-item-group__title{
+  padding: 0;
+}
+.flex_box{
+  height: 30px;
+  text-align: center;
+  background-color: #4a5064;
+  color: #fff;
+  line-height: 30px;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+.el-menu{
+  border: 0;
+}
+ /deep/ .el-menu-item-group__title{
   padding: 0;
 }
 </style>
