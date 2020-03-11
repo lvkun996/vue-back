@@ -6,6 +6,11 @@
 
 <script>
 export default {
+  name: 'limitsPage',
+  data () {
+    return {
+    }
+  }
 
 }
 </script>

@@ -3,11 +3,13 @@ import {
   Button, Form, FormItem, Input, Message, Container, Header, Aside, Main,
   Menu, Submenu, MenuItem, MenuItemGroup, Breadcrumb, BreadcrumbItem, Card,
   Autocomplete, Table, TableColumn, Switch, pagination, Dialog, MessageBox, Row, Col,
-  Tag
+  Tag, Tree, Select, Option
 } from 'element-ui'
 
 Vue.prototype.$message = Message
 Vue.prototype.$messageBox = MessageBox
+
+Vue.prototype.$show = false
 
 Vue.use(Button)
   .use(Form)
@@ -33,3 +35,6 @@ Vue.use(Button)
   .use(Row)
   .use(Col)
   .use(Tag)
+  .use(Tree)
+  .use(Select)
+  .use(Option)

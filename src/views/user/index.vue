@@ -58,12 +58,20 @@
                                 <el-input disabled v-model="roleUser.role_name"></el-input>
                         </el-form-item>
                         <el-form-item label="分配新角色">
-                                <el-input  v-model="editUser.username"></el-input>
+
+                           <el-select v-model="roleUser.rid" placeholder="请选择">
+                              <el-option
+                                v-for="item in allocationList"
+                                :key="item.id"
+                                :label="item.roleName"
+                                :value="item.id">
+                              </el-option>
+                            </el-select>
                         </el-form-item>
                       </el-form>
                         <span slot="footer" class="dialog-footer">
-                            <el-button @click="dialogStatusRole = false">取 消</el-button>
-                            <el-button type="primary" @click="confirmEdit">确 定</el-button>
+                            <el-button @click="OncalcelRole">取 消</el-button>
+                            <el-button type="primary" @click="allocationRole">确 定</el-button>
                         </span>
                     </el-dialog>
                    <el-pagination
@@ -82,7 +90,7 @@
 </template>
 
 <script>
-import { getUserList, putUserStatus, searchUser, editUserInfo, deleteUser, roleUser } from '@/API/user'
+import { getUserList, putUserStatus, searchUser, editUserInfo, deleteUser, roleUser, getRoleList } from '@/API/user'
 export default {
   name: 'userlistPage',
   data () {
@@ -109,7 +117,11 @@ export default {
         username: '',
         role_name: '',
         rid: ''
-      }
+      },
+      // 角色id
+      id: '',
+      // 角色列表
+      allocationList: []
     }
   },
   watch: {
@@ -119,23 +131,46 @@ export default {
           this.getUser()
         }
       }
-    },
-    userList: {
-      handler () {
-        this.getUser()
-      }
     }
+    // userList: {
+    //   handler () {
+    //     this.getUser()
+    //   }
+    // }
   },
   methods: {
+    // 取消分配权限
+    OncalcelRole () {
+      this.dialogStatusRole = false
+      this.roleUser.rid = null
+    },
+    // 确定分配用户权限
+    async  allocationRole () {
+      const { data } = await roleUser({ id: this.id, rid: this.roleUser.rid })
+      console.log(data)
+      try {
+        this.getUser()
+        this.$message.success(data.meta.msg)
+        this.dialogStatusRole = false
+        this.roleUser.rid = null
+      } catch (error) {
+        this.$message.error(data.meta.msg)
+      }
+    },
     // 分配用户
     async OnRoleUser (value) {
       this.dialogStatusRole = true
+      this.id = value.id
       console.log(value)
       this.roleUser.username = value.username
       this.roleUser.role_name = value.role_name
-      const { id, role_name: rid } = value
-      const { data } = await roleUser({ id, rid })
-      console.log(data)
+
+      const { data: res } = await getRoleList()
+      console.log(res)
+      this.allocationList = res.data
+      // const { id, role_name: rid } = value
+      // const { data } = await roleUser({ id, rid })
+      // console.log(data)
     },
     // 删除用户
     async  deleteUser (value) {

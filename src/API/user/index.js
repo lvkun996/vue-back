@@ -23,3 +23,7 @@ export const deleteUser = data => createAPI(`users/${data.id}`, 'DELETE')
 // 分配用户角色
 
 export const roleUser = data => createAPI(`users/${data.id}/role`, 'PUT', data)
+
+// 角色列表
+
+export const getRoleList = () => createAPI('roles', 'GET')
